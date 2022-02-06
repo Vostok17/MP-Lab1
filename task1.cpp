@@ -4,12 +4,12 @@ using namespace std;
 
 int main()
 {
-	const int WordsToDisplayCtn = 25;
+	const int DisplayedWordsCtn = 25;
 
 	const int StopWordsCtn = 12;
 	string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
-	const int MaxWords = 100;
+	const int MaxWords = 10000;
 	int* wordRepeats = new int[MaxWords] {};
 	string* words = new string[MaxWords];
 
@@ -117,7 +117,7 @@ loop_i:
 
 	i = 0;
 loop_output:
-	if (i < WordsToDisplayCtn)
+	if (i < DisplayedWordsCtn)
 	{
 		if (i < wordsCtn)
 		{
