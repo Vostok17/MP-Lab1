@@ -53,6 +53,29 @@ loop_input:
 		}
 		if (isNewWord)
 		{
+			int i = 0;
+		check_lower_case:
+			if (word[i] != '\0')
+			{
+				char c = word[i];
+				if ((c >= 'a' && c <= 'z') ||
+					(c >= 'A' && c <= 'Z') ||
+					(c == '-')) // allowed chars
+				{
+					if (c >= 'A' && c <= 'Z')
+					{
+						word[i] += 'a' - 'A';
+					}
+				}
+				else
+				{
+					wordsCtn--;
+					goto loop_input;
+				}
+				i++;
+				goto check_lower_case;
+			}
+
 			int idx = wordsCtn - 1;
 			words[idx] = word;
 			wordRepeats[idx] = 1;
@@ -77,6 +100,8 @@ loop_output:
 		goto loop_output;
 	}
 	fout.close();
+
+
 
 	delete[] wordRepeats, words;
 
