@@ -5,7 +5,6 @@ using namespace std;
 int main()
 {
 	const int WordsToDisplayCtn = 25;
-	string wordsToDisplay[WordsToDisplayCtn];
 
 	const int StopWordsCtn = 12;
 	string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
@@ -88,20 +87,43 @@ loop_input:
 	}
 	fin.close();
 
+	// Insertion sort
+	int i = 1;
+loop_i:
+	if (i < wordsCtn)
+	{
+		int j = i;
+	loop_j:
+		if (j > 0 && wordRepeats[j - 1] < wordRepeats[j])
+		{
+			int temp = wordRepeats[j];
+			wordRepeats[j] = wordRepeats[j - 1];
+			wordRepeats[j - 1] = temp;
+
+			string tempWord = words[j];
+			words[j] = words[j - 1];
+			words[j - 1] = tempWord;
+
+			j--;
+			goto loop_j;
+		}
+
+		i++;
+		goto loop_i;
+	}
+
 	ofstream fout;;
 	fout.open("output.txt");
 
-	int i = 0;
+	i = 0;
 loop_output:
-	if (i < wordsCtn)
+	if (i < wordsCtn || i < WordsToDisplayCtn)
 	{
 		fout << words[i] << " - " << wordRepeats[i] << endl;
 		i++;
 		goto loop_output;
 	}
 	fout.close();
-
-
 
 	delete[] wordRepeats, words;
 
