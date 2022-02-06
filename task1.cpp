@@ -117,11 +117,14 @@ loop_i:
 
 	i = 0;
 loop_output:
-	if (i < wordsCtn || i < WordsToDisplayCtn)
+	if (i < WordsToDisplayCtn)
 	{
-		fout << words[i] << " - " << wordRepeats[i] << endl;
-		i++;
-		goto loop_output;
+		if (i < wordsCtn)
+		{
+			fout << words[i] << " - " << wordRepeats[i] << endl;
+			i++;
+			goto loop_output;
+		}	
 	}
 	fout.close();
 
