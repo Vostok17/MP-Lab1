@@ -45,22 +45,27 @@ loop_input:
 		}	
 		word = fixedWord;
 
+		if (word == "")
+		{
+			goto loop_input;
+		}
+
 		i = 0;
-	check_word:
+	check_stop_words:
+		if (i < StopWordsCtn)
+		{
+			if (stopWords[i] == word)
+			{
+				goto loop_input;
+			}
+			i++;
+			goto check_stop_words;
+		}
+
+		i = 0;
+	check_word_repeats:
 		if (i < wordsCtn)
 		{
-			int j = 0;
-		check_stop_words:
-			if (j < StopWordsCtn)
-			{
-				if (stopWords[j] == word)
-				{
-					goto loop_input;
-				}
-				j++;
-				goto check_stop_words;
-			}
-
 			if (words[i] == word)
 			{
 				wordRepeats[i]++;
@@ -68,8 +73,9 @@ loop_input:
 			}
 
 			i++;
-			goto check_word;
+			goto check_word_repeats;
 		}
+
 		if (isNewWord)
 		{
 			words[wordsCtn] = word;

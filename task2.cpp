@@ -61,22 +61,27 @@ loop_input:
 		}
 		word = fixedWord;
 
+		if (word == "")
+		{
+			goto loop_input;
+		}
+
 		i = 0;
-	check_word:
+	check_stop_words:
+		if (i < StopWordsCtn)
+		{
+			if (stopWords[i] == word)
+			{
+				goto loop_input;
+			}
+			i++;
+			goto check_stop_words;
+		}
+
+		i = 0;
+	check_word_repeats:
 		if (i < wordsCtn)
 		{
-			int j = 0;
-		check_stop_words:
-			if (j < StopWordsCtn)
-			{
-				if (stopWords[j] == word)
-				{
-					goto loop_input;
-				}
-				j++;
-				goto check_stop_words;
-			}
-
 			if (words[i] == word)
 			{
 				wordRepeats[i]++;
@@ -84,7 +89,7 @@ loop_input:
 			}
 
 			i++;
-			goto check_word;
+			goto check_word_repeats;
 		}
 		if (isNewWord)
 		{
@@ -92,6 +97,11 @@ loop_input:
 			wordRepeats[wordsCtn] = 1;
 			wordsCtn++;
 		}
+
+		int wordIdx = wordsCtn - 1,
+			pageIdx = wordRepeats[wordIdx] - 1;
+		wordPages[wordIdx][pageIdx] = currString % 45 + 1;
+
 		goto loop_input;
 	}
 	fin.close();
@@ -102,6 +112,23 @@ loop_input:
 	ofstream fout;
 	fout.open("output.txt");
 
+	i = 0;
+loop_output:
+	if (i < wordsCtn)
+	{
+		fout << words[i] << " - ";
+		int j = 0;
+	loop_pages:
+		if (wordRepeats[j] != 0)
+		{
+			fout << wordRepeats[j] << ", ";
+			j++;
+			goto loop_pages;
+		}
+		fout << endl;
+		i++;
+		goto loop_output;
+	}
 	fout.close();
 
 	// free memory
