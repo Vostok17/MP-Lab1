@@ -13,11 +13,13 @@ int main()
 
 	int** wordPages = new int* [MaxWords];
 	const int MaxPages = 100;
+
 	int i = 0;
 init_word_pages:
 	if (i < MaxWords)
 	{
 		wordPages[i] = new int[MaxPages] {};
+		i++;
 		goto init_word_pages;
 	}
 	
@@ -27,11 +29,15 @@ init_word_pages:
 	fin.open("input.txt");
 
 	int wordsCtn = 0;
-	int currStr = 0;
+	int currString = 0;
 loop_input:
 	if (fin >> word)
 	{
-		wordsCtn++;
+		if (fin.get() == '\n')
+		{
+			currString++;
+		}
+
 		bool isNewWord = true;
 
 		int i = 0;
@@ -65,7 +71,6 @@ loop_input:
 			{
 				if (stopWords[j] == word)
 				{
-					wordsCtn--;
 					goto loop_input;
 				}
 				j++;
@@ -83,31 +88,30 @@ loop_input:
 		}
 		if (isNewWord)
 		{
-			int idx = wordsCtn - 1;
-			words[idx] = word;
-			wordRepeats[idx] = 1;
-		}
-		else
-		{
-			wordsCtn--;
+			words[wordsCtn] = word;
+			wordRepeats[wordsCtn] = 1;
+			wordsCtn++;
 		}
 		goto loop_input;
 	}
 	fin.close();
+	cout << "done" << endl;
 
+
+	// write to file
 	ofstream fout;
 	fout.open("output.txt");
 
 	fout.close();
 
-
-
+	// free memory
 	i = 0;
-init_word_pages:
+delete_word_pages:
 	if (i < MaxWords)
 	{
 		delete[] wordPages[i];
-		goto init_word_pages;
+		i++;
+		goto delete_word_pages;
 	}
 	delete[] wordRepeats, words, wordPages;
 
