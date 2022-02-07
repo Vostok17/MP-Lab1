@@ -22,14 +22,15 @@ init_word_pages:
 		i++;
 		goto init_word_pages;
 	}
-	
+
 	string word;
 
 	ifstream fin;
 	fin.open("input.txt");
 
-	int wordsCtn = 0;
-	int currString = 0;
+	int wordsCtn = 0,
+		cutWordsCtn = 0,
+		currString = 0;
 loop_input:
 	if (fin >> word)
 	{
@@ -85,6 +86,11 @@ loop_input:
 			if (words[i] == word)
 			{
 				wordRepeats[i]++;
+				if (wordRepeats[i] > 100)
+				{
+					words[i] = "";
+					cutWordsCtn++;
+				}
 				isNewWord = false;
 			}
 
@@ -100,13 +106,15 @@ loop_input:
 
 		int wordIdx = wordsCtn - 1,
 			pageIdx = wordRepeats[wordIdx] - 1;
-		wordPages[wordIdx][pageIdx] = currString % 45 + 1;
+		int pageNum = currString / 45 + 1;
+		wordPages[wordIdx][pageIdx] = pageNum;
 
 		goto loop_input;
 	}
 	fin.close();
 	cout << "done" << endl;
 
+	// TODO: cut off words that enter more than 100 times
 
 	// write to file
 	ofstream fout;
@@ -117,11 +125,14 @@ loop_output:
 	if (i < wordsCtn)
 	{
 		fout << words[i] << " - ";
+
 		int j = 0;
+		fout << wordPages[i][j];
+		j++;
 	loop_pages:
-		if (wordRepeats[j] != 0)
+		if (wordPages[i][j] != 0)
 		{
-			fout << wordRepeats[j] << ", ";
+			fout << ", " << wordPages[i][j];
 			j++;
 			goto loop_pages;
 		}
