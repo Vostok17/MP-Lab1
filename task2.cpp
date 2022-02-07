@@ -26,6 +26,73 @@ init_word_pages:
 	ifstream fin;
 	fin.open("input.txt");
 
+	int wordsCtn = 0;
+	int currStr = 0;
+loop_input:
+	if (fin >> word)
+	{
+		wordsCtn++;
+		bool isNewWord = true;
+
+		int i = 0;
+		string fixedWord = "";
+	process_word:
+		if (word[i] != '\0')
+		{
+			char c = word[i];
+			if ((c >= 'a' && c <= 'z') ||
+				(c >= 'A' && c <= 'Z') ||
+				(c == '-')) // allowed chars
+			{
+				if (c >= 'A' && c <= 'Z')
+				{
+					c += 'a' - 'A';
+				}
+				fixedWord += c;
+			}
+			i++;
+			goto process_word;
+		}
+		word = fixedWord;
+
+		i = 0;
+	check_word:
+		if (i < wordsCtn)
+		{
+			int j = 0;
+		check_stop_words:
+			if (j < StopWordsCtn)
+			{
+				if (stopWords[j] == word)
+				{
+					wordsCtn--;
+					goto loop_input;
+				}
+				j++;
+				goto check_stop_words;
+			}
+
+			if (words[i] == word)
+			{
+				wordRepeats[i]++;
+				isNewWord = false;
+			}
+
+			i++;
+			goto check_word;
+		}
+		if (isNewWord)
+		{
+			int idx = wordsCtn - 1;
+			words[idx] = word;
+			wordRepeats[idx] = 1;
+		}
+		else
+		{
+			wordsCtn--;
+		}
+		goto loop_input;
+	}
 	fin.close();
 
 	ofstream fout;

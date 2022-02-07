@@ -22,7 +22,6 @@ int main()
 loop_input:
 	if (fin >> word)
 	{
-		wordsCtn++;
 		bool isNewWord = true;
 
 		int i = 0;
@@ -56,7 +55,6 @@ loop_input:
 			{
 				if (stopWords[j] == word)
 				{
-					wordsCtn--;
 					goto loop_input;
 				}
 				j++;
@@ -74,13 +72,9 @@ loop_input:
 		}
 		if (isNewWord)
 		{
-			int idx = wordsCtn - 1;
-			words[idx] = word;
-			wordRepeats[idx] = 1;
-		}
-		else
-		{
-			wordsCtn--;
+			words[wordsCtn] = word;
+			wordRepeats[wordsCtn] = 1;
+			wordsCtn++;
 		}
 		goto loop_input;
 	}
