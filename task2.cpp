@@ -17,7 +17,7 @@ int main()
 init_word_pages:
 	if (i < MaxWords)
 	{
-		wordPages[i] = new int[MaxPages];
+		wordPages[i] = new int[MaxPages] {};
 		goto init_word_pages;
 	}
 	
