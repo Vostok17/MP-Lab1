@@ -4,11 +4,13 @@ using namespace std;
 
 int main()
 {
+    const int StringsInPage = 45;
+
     const int StopWordsCtn = 12;
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
     const int MaxWords = 10000;
-    int* wordRepeats = new int[MaxWords] {};
+    int* wordEntries = new int[MaxWords] {};
     string* words = new string[MaxWords];
 
     int** wordPages = new int* [MaxWords];
@@ -30,7 +32,7 @@ init_word_pages:
 
     int wordsCtn = 0,
         wordIdx = 0,
-        currString = 0;
+        currStr = 0;
 loop_input:
     if (fin >> word)
     {
@@ -38,14 +40,14 @@ loop_input:
         if (fin.peek() == '\n')
         {
             fin.get();
-            currString++;
+            currStr++;
             goto loop_empty_lines;
         }
 
         bool isNewWord = true;
 
-        int i = 0;
         string fixedWord = "";
+        int i = 0;
     process_word:
         if (word[i] != '\0')
         {
@@ -83,29 +85,29 @@ loop_input:
         }
 
         i = 0;
-    check_word_repeats:
+    check_word_Entries:
         if (i < wordsCtn)
         {
             if (words[i] == word)
             {
-                wordRepeats[i]++;
+                wordEntries[i]++;
                 isNewWord = false;
                 wordIdx = i;
             }
             i++;
-            goto check_word_repeats;
+            goto check_word_Entries;
         }
         if (isNewWord)
         {
             wordIdx = wordsCtn;
             words[wordIdx] = word;
-            wordRepeats[wordIdx] = 1;
+            wordEntries[wordIdx] = 1;
             wordsCtn++;
         }
-        if (wordRepeats[wordIdx] <= 100)
+        if (wordEntries[wordIdx] <= 100)
         {
-            int pageIdx = wordRepeats[wordIdx] - 1,
-                pageNum = currString / 45 + 1;
+            int pageIdx = wordEntries[wordIdx] - 1,
+                pageNum = currStr / StringsInPage + 1;
             wordPages[wordIdx][pageIdx] = pageNum;
         }
         goto loop_input;
@@ -114,7 +116,7 @@ loop_input:
     cout << "done" << endl;
 
     string* newWords = new string[wordsCtn];
-    int* newWordRepeats = new int[wordsCtn];
+    int* newWordEntries = new int[wordsCtn];
     int** newWordPages = new int* [wordsCtn];
     int ptr = 0;
 
@@ -122,10 +124,10 @@ loop_input:
 rewrite_words:
     if (i < wordsCtn)
     {
-        if (wordRepeats[i] <= 100)
+        if (wordEntries[i] <= 100)
         {
             newWords[ptr] = words[i];
-            newWordRepeats[ptr] = wordRepeats[i];
+            newWordEntries[ptr] = wordEntries[i];
             newWordPages[ptr] = wordPages[i];
             ptr++;
         }
@@ -144,14 +146,13 @@ free_memory:
         i++;
         goto free_memory;
     }
-    delete[] words, wordRepeats, wordPages;
+    delete[] words, wordEntries, wordPages;
 
     words = newWords;
-    wordRepeats = newWordRepeats;
+    wordEntries = newWordEntries;
     wordPages = newWordPages;
     wordsCtn = ptr;
 
-    // Insertion sort
     i = 1;
 loop_i:
     if (i < wordsCtn)
@@ -171,9 +172,9 @@ loop_i:
             }
             if (words[j - 1][k] > words[j][k] || words[j][k] == '\0')
             {
-                int temp = wordRepeats[j];
-                wordRepeats[j] = wordRepeats[j - 1];
-                wordRepeats[j - 1] = temp;
+                int temp = wordEntries[j];
+                wordEntries[j] = wordEntries[j - 1];
+                wordEntries[j - 1] = temp;
 
                 string tempWord = words[j];
                 words[j] = words[j - 1];
@@ -190,8 +191,6 @@ loop_i:
         goto loop_i;
     }
 
-
-    // write to file
     ofstream fout;
     fout.open("output.txt");
 
@@ -199,7 +198,7 @@ loop_i:
 loop_output:
     if (i < wordsCtn)
     {
-        if (wordRepeats[i] <= 100)
+        if (wordEntries[i] <= 100)
         {
             fout << words[i] << " - ";
 
@@ -207,7 +206,7 @@ loop_output:
             fout << wordPages[i][j];
             j++;
         loop_pages:
-            if (j < wordRepeats[i])
+            if (j < wordEntries[i])
             {
                 fout << ", " << wordPages[i][j];
                 j++;
@@ -220,7 +219,6 @@ loop_output:
     }
     fout.close();
 
-    // free memory
     i = 0;
 delete_word_pages:
     if (i < wordsCtn)
@@ -229,8 +227,7 @@ delete_word_pages:
         i++;
         goto delete_word_pages;
     }
-    delete[] wordRepeats, words, wordPages;
+    delete[] wordEntries, words, wordPages;
 
-    system("pause");
     return 0;
 }

@@ -10,29 +10,29 @@ int main()
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
     const int MaxWords = 10000;
-    int* wordRepeats = new int[MaxWords] {};
+    int* wordEntries = new int[MaxWords] {};
     string* words = new string[MaxWords];
 
+    int wordsCtn = 0;
     string word;
 
     ifstream fin;
     fin.open("input.txt");
 
-    int wordsCtn = 0;
 loop_input:
     if (fin >> word)
     {
         bool isNewWord = true;
 
-        int i = 0;
         string fixedWord = "";
+        int i = 0;     
     process_word:
         if (word[i] != '\0')
         {
             char c = word[i];
             if ((c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
-                (c == '-')) // allowed chars
+                (c == '-'))
             {
                 if (c >= 'A' && c <= 'Z')
                 {
@@ -45,7 +45,7 @@ loop_input:
         }	
         word = fixedWord;
 
-        if (word == "")
+        if (word == "" or word == "-")
         {
             goto loop_input;
         }
@@ -63,41 +63,38 @@ loop_input:
         }
 
         i = 0;
-    check_word_repeats:
+    check_word_Entries:
         if (i < wordsCtn)
         {
             if (words[i] == word)
             {
-                wordRepeats[i]++;
+                wordEntries[i]++;
                 isNewWord = false;
             }
-
             i++;
-            goto check_word_repeats;
+            goto check_word_Entries;
         }
-
         if (isNewWord)
         {
             words[wordsCtn] = word;
-            wordRepeats[wordsCtn] = 1;
+            wordEntries[wordsCtn] = 1;
             wordsCtn++;
         }
         goto loop_input;
     }
     fin.close();
 
-    // Insertion sort
     int i = 1;
 loop_i:
     if (i < wordsCtn)
     {
         int j = i;
     loop_j:
-        if (j > 0 && wordRepeats[j - 1] < wordRepeats[j])
+        if (j > 0 && wordEntries[j - 1] < wordEntries[j])
         {
-            int temp = wordRepeats[j];
-            wordRepeats[j] = wordRepeats[j - 1];
-            wordRepeats[j - 1] = temp;
+            int temp = wordEntries[j];
+            wordEntries[j] = wordEntries[j - 1];
+            wordEntries[j - 1] = temp;
 
             string tempWord = words[j];
             words[j] = words[j - 1];
@@ -106,7 +103,6 @@ loop_i:
             j--;
             goto loop_j;
         }
-
         i++;
         goto loop_i;
     }
@@ -116,19 +112,15 @@ loop_i:
 
     i = 0;
 loop_output:
-    if (i < DisplayedWordsCtn)
+    if (i < DisplayedWordsCtn && i < wordsCtn)
     {
-        if (i < wordsCtn)
-        {
-            fout << words[i] << " - " << wordRepeats[i] << endl;
-            i++;
-            goto loop_output;
-        }	
+        fout << words[i] << " - " << wordEntries[i] << endl;
+        i++;
+        goto loop_output;
     }
     fout.close();
 
-    delete[] wordRepeats, words;
+    delete[] wordEntries, words;
 
-    system("pause");
     return 0;
 }
