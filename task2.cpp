@@ -65,7 +65,7 @@ loop_input:
         }
         word = fixedWord;
 
-        if (word == "")
+        if (word == "" or word == "-")
         {
             goto loop_input;
         }
@@ -151,7 +151,45 @@ free_memory:
     wordPages = newWordPages;
     wordsCtn = ptr;
 
-    // TODO: alphabetical sort
+    // Insertion sort
+    i = 1;
+loop_i:
+    if (i < wordsCtn)
+    {
+        int j = i;
+    loop_j:
+        if (j > 0)
+        {
+            int k = 0;
+        loop_char:
+            if (words[j][k] != '\0' && 
+                words[j - 1][k] != '\0' && 
+                words[j][k] == words[j - 1][k])
+            {
+                k++;
+                goto loop_char;
+            }
+            if (words[j - 1][k] > words[j][k] || words[j][k] == '\0')
+            {
+                int temp = wordRepeats[j];
+                wordRepeats[j] = wordRepeats[j - 1];
+                wordRepeats[j - 1] = temp;
+
+                string tempWord = words[j];
+                words[j] = words[j - 1];
+                words[j - 1] = tempWord;
+
+                int* tempWordPages = wordPages[j];
+                wordPages[j] = wordPages[j - 1];
+                wordPages[j - 1] = tempWordPages;
+            }
+            j--;
+            goto loop_j;
+        }
+        i++;
+        goto loop_i;
+    }
+
 
     // write to file
     ofstream fout;
