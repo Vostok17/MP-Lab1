@@ -30,12 +30,11 @@ init_word_pages:
 
     int wordsCtn = 0,
         wordIdx = 0,
-        cutWordsCtn = 0,
         currString = 0;
 loop_input:
     if (fin >> word)
     {
-        loop_empty_lines:
+    loop_empty_lines:
         if (fin.peek() == '\n')
         {
             fin.get();
@@ -70,7 +69,7 @@ loop_input:
         {
             goto loop_input;
         }
-        
+
         i = 0;
     check_stop_words:
         if (i < StopWordsCtn)
@@ -114,17 +113,45 @@ loop_input:
     fin.close();
     cout << "done" << endl;
 
-    // TODO: cut off words that enter more than 100 times
+    string* newWords = new string[wordsCtn];
+    int* newWordRepeats = new int[wordsCtn];
+    int** newWordPages = new int* [wordsCtn];
+    int ptr = 0;
 
-    /*for (size_t i = 0; i < wordsCtn && wordRepeats[i] <= 100; i++)
+    i = 0;
+rewrite_words:
+    if (i < wordsCtn)
     {
-        cout << words[i] << " " << wordRepeats[i] << " : ";
-        for (size_t j = 0; j < wordRepeats[i]; j++)
+        if (wordRepeats[i] <= 100)
         {
-            cout << wordPages[i][j] << " ";
+            newWords[ptr] = words[i];
+            newWordRepeats[ptr] = wordRepeats[i];
+            newWordPages[ptr] = wordPages[i];
+            ptr++;
         }
-        cout << endl;
-    }*/
+        else
+        {
+            delete[] wordPages[i];
+        }
+        i++;
+        goto rewrite_words;
+    }
+    i = wordsCtn;
+free_memory:
+    if (i < MaxWords)
+    {
+        delete[] wordPages[i];
+        i++;
+        goto free_memory;
+    }
+    delete[] words, wordRepeats, wordPages;
+
+    words = newWords;
+    wordRepeats = newWordRepeats;
+    wordPages = newWordPages;
+    wordsCtn = ptr;
+
+    // TODO: alphabetical sort
 
     // write to file
     ofstream fout;
@@ -158,7 +185,7 @@ loop_output:
     // free memory
     i = 0;
 delete_word_pages:
-    if (i < MaxWords)
+    if (i < wordsCtn)
     {
         delete[] wordPages[i];
         i++;
