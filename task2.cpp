@@ -54,7 +54,7 @@ loop_input:
             char c = word[i];
             if ((c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
-                (c == '-')) // allowed chars
+                (c == '-'))
             {
                 if (c >= 'A' && c <= 'Z')
                 {
@@ -113,7 +113,6 @@ loop_input:
         goto loop_input;
     }
     fin.close();
-    cout << "done" << endl;
 
     string* newWords = new string[wordsCtn];
     int* newWordEntries = new int[wordsCtn];
