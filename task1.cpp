@@ -9,7 +9,7 @@ int main()
     const int StopWordsCtn = 12;
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
-    int totalRecords = 100;
+    int totalRecords = 5;
 
     struct Record
     {
@@ -85,6 +85,22 @@ loop_input:
             records[wordsCtn].word = word;
             records[wordsCtn].count = 1;
             wordsCtn++;
+        }
+        if (wordsCtn == totalRecords)
+        {
+            totalRecords *= 2;
+            Record* newRecords = new Record[totalRecords];
+
+            i = 0;
+        resize: 
+            if (i < wordsCtn)
+            {
+                newRecords[i] = records[i];
+                i++;
+                goto resize;
+            }
+            delete[] records;
+            records = newRecords;
         }
         goto loop_input;
     }
