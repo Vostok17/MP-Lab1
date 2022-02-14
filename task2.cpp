@@ -9,21 +9,18 @@ int main()
     const int StopWordsCtn = 12;
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
-    int maxWords = 1000;
-    int* wordEntries = new int[maxWords] {};
-    string* words = new string[maxWords];
+    const int MaxEntries = 100;
 
-    int** wordPages = new int* [maxWords];
-    const int MaxPages = 100;
+    int totalRecords = 1000;
 
-    int i = 0;
-init_word_pages:
-    if (i < maxWords)
+    struct Record
     {
-        wordPages[i] = new int[MaxPages] {};
-        i++;
-        goto init_word_pages;
-    }
+        string word = "";
+        int count = 0;
+        int* pages = new int[MaxEntries];
+    };
+
+    Record* records = new Record[totalRecords];
 
     string word;
 
@@ -89,9 +86,9 @@ loop_input:
     check_word_Entries:
         if (i < wordsCtn && isNewWord)
         {
-            if (words[i] == word)
+            if (records[i].word == word)
             {
-                if (++wordEntries[i] == 101)
+                if (++records[i].count == MaxEntries + 1)
                 {
                     cutWordsCtn++;
                 }
@@ -104,90 +101,72 @@ loop_input:
 
         if (isNewWord)
         {
-            wordIdx = wordsCtn;
-            words[wordIdx] = word;
-            wordEntries[wordIdx] = 1;
             wordsCtn++;
+            wordIdx = wordsCtn - 1;
+
+            records[wordIdx].word = word;
+            records[wordIdx].count = 1;
         }
-        if (wordsCtn == maxWords)
+        if (wordsCtn == totalRecords)
         {
-            maxWords *= 2;
-            string* newWords = new string[maxWords];
-            int* newWordEntries = new int[maxWords];
-            int** newWordPages = new int* [maxWords];
+            totalRecords *= 2;
+            Record* newRecords = new Record[totalRecords];
 
             i = 0;
-        resize_words:
+        copy_records:
             if (i < wordsCtn)
             {
-                newWords[i] = words[i];
-                newWordEntries[i] = wordEntries[i];
-                newWordPages[i] = wordPages[i];
+                newRecords[i] = records[i];
                 i++;
-                goto resize_words;
+                goto copy_records;
             }
-            delete[] words, wordEntries, wordPages;
+            delete[] records;
 
-            i = wordsCtn;
-        init_second_part:
-            if (i < maxWords)
-            {
-                newWordPages[i] = new int[MaxPages] {};
-                i++;
-                goto init_second_part;
-            }
-
-            words = newWords;
-            wordEntries = newWordEntries;
-            wordPages = newWordPages;
+            records = newRecords;
         }
-        if (wordEntries[wordIdx] <= 100)
+        if (records[wordIdx].count <= 100)
         {
-            int pageIdx = wordEntries[wordIdx] - 1,
+            int pageIdx = records[wordIdx].count - 1,
                 pageNum = currStr / StringsInPage + 1;
-            wordPages[wordIdx][pageIdx] = pageNum;
+            records[wordIdx].pages[pageIdx] = pageNum;
         }
         goto loop_input;
     }
     fin.close();
 
     int size = wordsCtn - cutWordsCtn;
-    string* newWords = new string[size];
-    int* newWordEntries = new int[size];
-    int** newWordPages = new int* [size];
-    int ptr = 0;
 
-    i = 0;
-rewrite_words:
+    Record* newRecords = new Record[size];
+
+    int ptr = 0,
+        i = 0;
+cut_words:
     if (i < wordsCtn)
     {
-        if (wordEntries[i] <= 100)
+        if (records[i].count <= 100)
         {
-            newWords[ptr] = words[i];
-            newWordEntries[ptr] = wordEntries[i];
-            newWordPages[ptr] = wordPages[i];
+            newRecords[ptr] = records[i];
             ptr++;
         }
         else
         {
-            delete[] wordPages[i];
+            delete[] records[i].pages;
         }
         i++;
-        goto rewrite_words;
+        goto cut_words;
     }
+
     i = wordsCtn;
 free_memory:
-    if (i < maxWords)
+    if (i < totalRecords)
     {
-        delete[] wordPages[i];
+        delete[] records[i].pages;
         i++;
         goto free_memory;
     }
-    delete[] words, wordEntries, wordPages;
-
-    words = newWords;
-    wordEntries = newWordEntries;
-    wordPages = newWordPages;
+    
+    delete[] records;
+    records = newRecords;
     wordsCtn = size;
 
     i = 1;
@@ -200,26 +179,18 @@ loop_i:
         {
             int k = 0;
         loop_char:
-            if (words[j][k] != '\0' && 
-                words[j - 1][k] != '\0' && 
-                words[j][k] == words[j - 1][k])
+            if (records[j].word[k] != '\0' &&
+                records[j - 1].word[k] != '\0' &&
+                records[j].word[k] == records[j - 1].word[k])
             {
                 k++;
                 goto loop_char;
             }
-            if (words[j - 1][k] > words[j][k] || words[j][k] == '\0')
+            if (records[j - 1].word[k] > records[j].word[k] || records[j].word[k] == '\0')
             {
-                int temp = wordEntries[j];
-                wordEntries[j] = wordEntries[j - 1];
-                wordEntries[j - 1] = temp;
-
-                string tempWord = words[j];
-                words[j] = words[j - 1];
-                words[j - 1] = tempWord;
-
-                int* tempWordPages = wordPages[j];
-                wordPages[j] = wordPages[j - 1];
-                wordPages[j - 1] = tempWordPages;
+                Record temp = records[j];
+                records[j] = records[j - 1];
+                records[j - 1] = temp;
             }
             j--;
             goto loop_j;
@@ -235,38 +206,34 @@ loop_i:
 loop_output:
     if (i < wordsCtn)
     {
-        if (wordEntries[i] <= 100)
-        {
-            fout << words[i] << " - ";
+        fout << records[i].word << " - ";
 
-            int j = 0;
-            fout << wordPages[i][j];
+        int j = 0;
+        fout << records[i].pages[j];
+        j++;
+    loop_pages:
+        if (j < records[i].count)
+        {
+            fout << ", " << records[i].pages[j];
             j++;
-        loop_pages:
-            if (j < wordEntries[i])
-            {
-                fout << ", " << wordPages[i][j];
-                j++;
-                goto loop_pages;
-            }
-            fout << endl;
+            goto loop_pages;
         }
+        fout << endl;
+
         i++;
         goto loop_output;
     }
     fout.close();
 
     i = 0;
-delete_word_pages:
+clean_memory:
     if (i < wordsCtn)
     {
-        delete[] wordPages[i];
+        delete[] records[i].pages;
         i++;
-        goto delete_word_pages;
+        goto clean_memory;
     }
-    delete[] wordEntries, words, wordPages;
+    delete[] records;
 
-    cout << size << endl;
-    system("pause");
     return 0;
 }
