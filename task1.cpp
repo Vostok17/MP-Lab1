@@ -9,9 +9,15 @@ int main()
     const int StopWordsCtn = 12;
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
-    const int MaxWords = 10000;
-    int* wordEntries = new int[MaxWords] {};
-    string* words = new string[MaxWords];
+    int totalRecords = 100;
+
+    struct Record
+    {
+        string word = "";
+        int count = 0;
+    };
+
+    Record* records = new Record[totalRecords];
 
     int wordsCtn = 0;
     string word;
@@ -25,7 +31,7 @@ loop_input:
         bool isNewWord = true;
 
         string fixedWord = "";
-        int i = 0;     
+        int i = 0;
     process_word:
         if (word[i] != '\0')
         {
@@ -42,10 +48,10 @@ loop_input:
             }
             i++;
             goto process_word;
-        }	
+        }
         word = fixedWord;
 
-        if (word == "" or word == "-")
+        if (word == "" || word == "-")
         {
             goto loop_input;
         }
@@ -63,21 +69,21 @@ loop_input:
         }
 
         i = 0;
-    check_word_Entries:
-        if (i < wordsCtn)
+    check_word_entries:
+        if (i < wordsCtn && isNewWord)
         {
-            if (words[i] == word)
+            if (records[i].word == word)
             {
-                wordEntries[i]++;
+                records[i].count++;
                 isNewWord = false;
             }
             i++;
-            goto check_word_Entries;
+            goto check_word_entries;
         }
         if (isNewWord)
         {
-            words[wordsCtn] = word;
-            wordEntries[wordsCtn] = 1;
+            records[wordsCtn].word = word;
+            records[wordsCtn].count = 1;
             wordsCtn++;
         }
         goto loop_input;
@@ -90,15 +96,11 @@ loop_i:
     {
         int j = i;
     loop_j:
-        if (j > 0 && wordEntries[j - 1] < wordEntries[j])
+        if (j > 0 && records[j - 1].count < records[j].count)
         {
-            int temp = wordEntries[j];
-            wordEntries[j] = wordEntries[j - 1];
-            wordEntries[j - 1] = temp;
-
-            string tempWord = words[j];
-            words[j] = words[j - 1];
-            words[j - 1] = tempWord;
+            Record temp = records[j];
+            records[j] = records[j - 1];
+            records[j - 1] = temp;
 
             j--;
             goto loop_j;
@@ -114,13 +116,13 @@ loop_i:
 loop_output:
     if (i < DisplayedWordsCtn && i < wordsCtn)
     {
-        fout << words[i] << " - " << wordEntries[i] << endl;
+        fout << records[i].word << " - " << records[i].count << endl;
         i++;
         goto loop_output;
     }
     fout.close();
 
-    delete[] wordEntries, words;
+    delete[] records;
 
     return 0;
 }

@@ -83,7 +83,7 @@ loop_input:
         }
 
         i = 0;
-    check_word_Entries:
+    check_word_entries:
         if (i < wordsCtn && isNewWord)
         {
             if (records[i].word == word)
@@ -96,7 +96,7 @@ loop_input:
                 wordIdx = i;
             }
             i++;
-            goto check_word_Entries;
+            goto check_word_entries;
         }
 
         if (isNewWord)
