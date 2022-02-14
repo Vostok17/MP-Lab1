@@ -9,16 +9,16 @@ int main()
     const int StopWordsCtn = 12;
     string stopWords[] = { "at", "for", "the", "in", "before", "on", "so", "a", "than", "to", "with", "by" };
 
-    const int MaxWords = 10000;
-    int* wordEntries = new int[MaxWords] {};
-    string* words = new string[MaxWords];
+    int maxWords = 1000;
+    int* wordEntries = new int[maxWords] {};
+    string* words = new string[maxWords];
 
-    int** wordPages = new int* [MaxWords];
+    int** wordPages = new int* [maxWords];
     const int MaxPages = 100;
 
     int i = 0;
 init_word_pages:
-    if (i < MaxWords)
+    if (i < maxWords)
     {
         wordPages[i] = new int[MaxPages] {};
         i++;
@@ -31,6 +31,7 @@ init_word_pages:
     fin.open("input.txt");
 
     int wordsCtn = 0,
+        cutWordsCtn = 0,
         wordIdx = 0,
         currStr = 0;
 loop_input:
@@ -67,7 +68,7 @@ loop_input:
         }
         word = fixedWord;
 
-        if (word == "" or word == "-")
+        if (word == "" || word == "-")
         {
             goto loop_input;
         }
@@ -86,23 +87,59 @@ loop_input:
 
         i = 0;
     check_word_Entries:
-        if (i < wordsCtn)
+        if (i < wordsCtn && isNewWord)
         {
             if (words[i] == word)
             {
-                wordEntries[i]++;
+                if (++wordEntries[i] == 101)
+                {
+                    cutWordsCtn++;
+                }
                 isNewWord = false;
                 wordIdx = i;
             }
             i++;
             goto check_word_Entries;
         }
+
         if (isNewWord)
         {
             wordIdx = wordsCtn;
             words[wordIdx] = word;
             wordEntries[wordIdx] = 1;
             wordsCtn++;
+        }
+        if (wordsCtn == maxWords)
+        {
+            maxWords *= 2;
+            string* newWords = new string[maxWords];
+            int* newWordEntries = new int[maxWords];
+            int** newWordPages = new int* [maxWords];
+
+            i = 0;
+        resize_words:
+            if (i < wordsCtn)
+            {
+                newWords[i] = words[i];
+                newWordEntries[i] = wordEntries[i];
+                newWordPages[i] = wordPages[i];
+                i++;
+                goto resize_words;
+            }
+            delete[] words, wordEntries, wordPages;
+
+            i = wordsCtn;
+        init_second_part:
+            if (i < maxWords)
+            {
+                newWordPages[i] = new int[MaxPages] {};
+                i++;
+                goto init_second_part;
+            }
+
+            words = newWords;
+            wordEntries = newWordEntries;
+            wordPages = newWordPages;
         }
         if (wordEntries[wordIdx] <= 100)
         {
@@ -114,9 +151,10 @@ loop_input:
     }
     fin.close();
 
-    string* newWords = new string[wordsCtn];
-    int* newWordEntries = new int[wordsCtn];
-    int** newWordPages = new int* [wordsCtn];
+    int size = wordsCtn - cutWordsCtn;
+    string* newWords = new string[size];
+    int* newWordEntries = new int[size];
+    int** newWordPages = new int* [size];
     int ptr = 0;
 
     i = 0;
@@ -139,7 +177,7 @@ rewrite_words:
     }
     i = wordsCtn;
 free_memory:
-    if (i < MaxWords)
+    if (i < maxWords)
     {
         delete[] wordPages[i];
         i++;
@@ -150,7 +188,7 @@ free_memory:
     words = newWords;
     wordEntries = newWordEntries;
     wordPages = newWordPages;
-    wordsCtn = ptr;
+    wordsCtn = size;
 
     i = 1;
 loop_i:
@@ -228,5 +266,7 @@ delete_word_pages:
     }
     delete[] wordEntries, words, wordPages;
 
+    cout << size << endl;
+    system("pause");
     return 0;
 }
