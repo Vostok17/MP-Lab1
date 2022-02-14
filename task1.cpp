@@ -125,7 +125,7 @@ loop_i:
         goto loop_i;
     }
 
-    ofstream fout;;
+    ofstream fout;
     fout.open("output.txt");
 
     i = 0;
